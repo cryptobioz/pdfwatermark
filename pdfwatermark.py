@@ -32,11 +32,14 @@ import click
               help='Destination file, by default files are modified in place')
 @click.option('--rotate', default=0, type=int,
               help='Rotation angle')
+@click.option('-a', '--all-pages', default=False, is_flag=True, type=bool,
+              help='Apply the mark on every pages of the document')
+
 
 def annotate(filename, watermark, regex, font_name, font_size, color, opacity,
-             x, y, destination_file_name, rotate):
+             x, y, destination_file_name, rotate, all_pages):
+             
     mask_stream = BytesIO()
-
     watermark_canvas = canvas.Canvas(mask_stream, pagesize=A4)
     watermark_canvas.setFont(font_name, font_size)
     r, g, b = hex_to_rgb(color)
@@ -57,12 +60,11 @@ def annotate(filename, watermark, regex, font_name, font_size, color, opacity,
     src = PdfFileReader(filename)
     output = PdfFileWriter()
 
-    page = src.getPage(0)
-    page.mergePage(mask.getPage(0))
-    output.addPage(page)
-
-    for page in range(1, src.getNumPages()):
-        output.addPage(src.getPage(page))
+    for page_index in range(0, src.getNumPages()):
+        page = src.getPage(page_index)
+        if page_index == 0 or all_pages:
+            page.mergePage(mask.getPage(0))
+        output.addPage(page)
 
     if not destination_file_name:
         destination_file_name = filename
