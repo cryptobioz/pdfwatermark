@@ -1,0 +1,4 @@
+click==8.0.3
+PyPDF2==2.12.1
+reportlab==3.6.8
+webcolors==24.8.0
